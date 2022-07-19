@@ -5,15 +5,16 @@ const Solve = require('../models/solve')
 
 solvesRouter.get('/', (req, res, next) => {
                 Solve.find()
-                     .then(solves => res.status(200).json(solves))
+                     .then(solves => res.status(200).json({ result: solves }))
                      .catch(err => res.status(500).json({ error: err }))
             })
             .get('/:id', (req, res, next) => {
                 Solve.find()
-                     .then(solve => res.status(200).json(solve))
+                     .then(solve => res.status(200).json({ result: solve }))
                      .catch(err => res.status(500).json({ error: err }))
             })
             .post('/', async (req, res, next) => {
+                console.log('in post route')
                 const newSolve = new Solve({
                     id: await Solve.getId(),
                     startTime: req.body.startTime,
@@ -22,7 +23,7 @@ solvesRouter.get('/', (req, res, next) => {
                 if (req.body.scramble) newSolve.scramble = req.body.scramble
 
                 newSolve.save()
-                        .then(savedSolve => res.status(201).json(savedSolve))
+                        .then(savedSolve => res.status(201).json({ result: savedSolve }))
                         .catch(err => res.status(500).json({ error: err }))
             })
             .put('/:id', (req, res, next) => {
@@ -30,14 +31,14 @@ solvesRouter.get('/', (req, res, next) => {
                     .findOne({ id: req.params.id })
                     .then(solve => {
                         solve.updateComment(req.body.comment)
-                             .then(result => res.status(204).json(result))
+                             .then(result => res.status(204).json({ result: result }))
                     })
                     .catch(err => res.status(500).json({ error: err }))
             })
             .delete('/:id', (req, res, next) => {
                 Solve
                     .findByIdAndDelete(req.params.id)
-                    .then(result => res.status(204).json(result) )
+                    .then(result => res.status(204).json({ result: result }) )
                     .catch(err => res.status(500).json({ error: err }))
             })
             .use('*', (req, res) => {

@@ -2,6 +2,8 @@
 const express = require('express');
 const mongoose = require('mongoose')
 const http = require('http');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
 
 const port = process.env.PORT || '3000';
 
@@ -19,6 +21,8 @@ const expressApp = express(); // create an instance of express
 expressApp
     .use(express.json())
     .use(express.urlencoded({ extended: false }))
+    .use(cookieParser())
+    .use(logger('dev'))
     .use((req, res, next) => {
         res.setHeader('Access-Control-Allow-Origin', '*');
         res.setHeader(
