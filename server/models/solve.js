@@ -6,7 +6,7 @@ const Schema = mongoose.Schema
 
 const solveSchema = new Schema({
     id: {
-        type: String,
+        type: Number,
         required: true
     },
     startTime: {

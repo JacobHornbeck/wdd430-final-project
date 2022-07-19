@@ -1,9 +1,11 @@
 // Get dependencies
 const express = require('express');
 const mongoose = require('mongoose')
+const path = require('path');
 const http = require('http');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
+const cors = require('cors')
 
 const port = process.env.PORT || '3000';
 
@@ -23,18 +25,7 @@ expressApp
     .use(express.urlencoded({ extended: false }))
     .use(cookieParser())
     .use(logger('dev'))
-    .use((req, res, next) => {
-        res.setHeader('Access-Control-Allow-Origin', '*');
-        res.setHeader(
-            'Access-Control-Allow-Headers',
-            'Origin, X-Requested-With, Content-Type, Accept'
-        );
-        res.setHeader(
-            'Access-Control-Allow-Methods',
-            'GET, POST, PATCH, PUT, DELETE, OPTIONS'
-        );
-        next();
-    })
+    .use(cors())
     // .use(express.static(path.join(__dirname, 'dist/wdd430-final-project')))
     .use('/solves', solveRoutes)
     .use((req, res) => {

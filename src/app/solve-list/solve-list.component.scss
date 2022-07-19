@@ -1,0 +1,68 @@
+.solve-list {
+    display: grid;
+    position: relative;
+    grid-template-columns: 2fr 1fr;
+    background-color: lightgray;
+    border: 1px solid gray;
+    border-radius: 5px;
+    max-height: 300px;
+    overflow: auto;
+
+    .solves {
+        display: flex;
+        flex-direction: column;
+        background-color: lighten(lightgray, 10);
+        column-gap: 0.5rem;
+        padding: 1.0rem;
+
+        .solve {
+            display: grid;
+            grid-template-columns: auto auto 20px;
+            background-color: white;
+            padding: 0.5rem;
+            border: 1px solid gray;
+
+            &:first-of-type {
+                border-radius: 5px 5px 0 0;
+            }
+            &:last-of-type {
+                border-radius: 0 0 5px 5px;
+            }
+            .comment {
+                border: none;
+                border-bottom: 2px solid transparent;
+                margin-right: 0.75rem;
+                text-align: center;
+                outline: none;
+            }
+            .comment:active, .comment:focus {
+                border-bottom-color: gray;
+            }
+            .material-symbols-outlined {
+                font-size: 1rem;
+                cursor: pointer;
+                
+                &:hover {
+                    font-weight: bold;
+                    color: red;
+                }
+            }
+        }
+    }
+    .stats {
+        display: grid;
+        position: sticky;
+        align-items: center;
+        grid-template-columns: 1fr 1fr;
+        height: max-content;
+        grid-row: 1 / -1;
+        max-width: 200px;
+        grid-column: 2;
+        padding: 1rem;
+        top: 0;
+    }
+    .time {
+        font-size: 1.1rem;
+        font-family: monospace;
+    }
+}

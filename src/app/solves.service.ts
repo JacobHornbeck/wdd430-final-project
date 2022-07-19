@@ -4,10 +4,13 @@ import { HttpClient, HttpHeaders } from "@angular/common/http";
 
 import { Solve } from './solve.model';
 
+let turns = ['U','D','L','R','F','B']
+let directions = ['', '2', '\'', '', '2']
+
 @Injectable({ providedIn: 'root' })
 export class SolvesService {
     solvesChanged = new Subject<Solve[]>();
-    solveUpdated = new Subject<Solve>();
+    scrambleChanged = new Subject<string>();
     scramble: string = ''
     private solves: Solve[] = [];
     private solvesHaveChanged(newSolves: Solve[] = []) {
@@ -15,19 +18,36 @@ export class SolvesService {
             this.solves = newSolves;
         this.solvesChanged.next(this.solves.slice());
     }
-    private getDiff(d1: Date, d2: Date) { return d2.getTime() - d1.getTime() }
+    private getDiff(d1: Date, d2: Date) { return new Date(d2).getTime() - new Date(d1).getTime() }
+    expandSolveTime(t: number) {
+        let diff = t
+        let minutes = Math.floor(diff / 60000)
+            diff -= minutes * 60000
+        let seconds = Math.floor(diff / 1000)
+            diff -= seconds * 1000
+        let milliseconds = Math.floor(diff)
+
+        return `${minutes > 0 ? `${minutes}:` : ''}${((minutes > 0 && seconds < 10) ? `0${seconds}` : seconds)}.${milliseconds < 10 ? `00${milliseconds}` : (milliseconds < 100 ? `0${milliseconds}` : milliseconds)}`
+    }
     calcSolveTime(d1: Date, d2: Date) {
         let diff = this.getDiff(d1, d2)
         let minutes = Math.floor(diff / 60000)
             diff -= minutes * 60000
         let seconds = Math.floor(diff / 1000)
             diff -= seconds * 1000
-        let milliseconds = diff
+        let milliseconds = Math.floor(diff)
 
-        return `${minutes > 0 ? `${minutes}:` : ''}${seconds}.${milliseconds}`
+        return `${minutes > 0 ? `${minutes}:` : ''}${((minutes > 0 && seconds < 10) ? `0${seconds}` : seconds)}.${milliseconds < 10 ? `00${milliseconds}` : (milliseconds < 100 ? `0${milliseconds}` : milliseconds)}`
     }
     generateScramble() {
-        this.scramble = "L2 U F2 B R' F2 B2 R B' D L' B2 L' F2 D2 B2 U2 R' D2"
+        let temp = ''
+        let start = Math.floor(Math.random()*turns.length)
+        for (let i = 0; i < 20; i++) {
+            temp += turns[start]+directions[Math.floor(Math.random()*100)%directions.length] + " "
+            start = (start + Math.floor(Math.random()*2+1)) % turns.length
+        }
+        this.scramble = temp
+        this.scrambleChanged.next(this.scramble)
     }
 
     constructor(private http: HttpClient) {
@@ -44,26 +64,24 @@ export class SolvesService {
     }
 
     getAverageTime() {
-        return (this.solves.reduce((p: number, c: Solve) => p + this.getDiff(c.endTime, c.startTime), 0))
+        return (this.solves.reduce((p: number, c: Solve) => p + this.getDiff(c.startTime, c.endTime), 0)/this.solves.length)
     }
 
     getBestTime() {
         return (this.solves.reduce((p: number, c: Solve) => {
-            if (p == NaN) return this.getDiff(c.endTime, c.startTime)
-            else return Math.min(this.getDiff(c.endTime, c.startTime), p)
-        }, NaN))
+            return Math.min(this.getDiff(c.startTime, c.endTime), p)
+        }, Infinity))
     }
 
     getWorstTime() {
         return (this.solves.reduce((p: number, c: Solve) => {
-            if (p == NaN) return this.getDiff(c.endTime, c.startTime)
-            else return Math.max(this.getDiff(c.endTime, c.startTime), p)
-        }, NaN))
+            return Math.max(this.getDiff(c.startTime, c.endTime), p)
+        }, 0))
     }
 
     addSolve(solve: Solve) {
         if (!solve) return
-        solve.id = '';
+        solve.id = 0;
     
         const headers = new HttpHeaders({'Content-Type': 'application/json'});
         this.http
@@ -88,17 +106,16 @@ export class SolvesService {
             .subscribe(() => {
                 this.solves[pos] = newSolve
                 this.solvesHaveChanged()
-                this.solveUpdated.next(newSolve)
             });
     }
-    deleteSolve(solve: Solve) {
-        if (!solve) return
+    deleteSolve(id: number) {
+        if (!id) return
 
-        const pos = this.solves.findIndex((d) => d.id === solve.id);
+        const pos = this.solves.findIndex((d) => d.id === id);
         if (pos < 0) return
 
         this.http
-            .delete('http://localhost:3000/solves/' + solve.id)
+            .delete('http://localhost:3000/solves/' + id)
             .subscribe(() => {
                 this.solves.splice(pos, 1);
                 this.solvesHaveChanged()

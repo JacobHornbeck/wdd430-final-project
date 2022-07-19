@@ -1,5 +1,22 @@
 <div class="solve-list">
-    <div class="solve" *ngFor="let solve of solves">
-
+    <div class="solves">
+        <div class="solve" *ngFor="let solve of solves">
+            <span class="time">{{ solve.solveTime }}</span>
+            <input type="text" class="comment" id="comment{{ solve.id }}" (blur)="updateComment(solve.id)" value="{{ solve.comment }}">
+            <span class="material-symbols-outlined" (click)="deleteSolve(solve.id)">block</span>
+        </div>
+    </div>
+    <div class="stats">
+        <span>Best:</span>
+        <span class="time">{{ bestTime }}</span>
+        <span>Worst:</span>
+        <span class="time">{{ worstTime }}</span>
+        <span>Average:</span>
+        <span class="time">{{ averageTime }}</span>
+        <span>Count:</span>
+        <span class="time">{{ solveCount }}</span>
+    </div>
+    <div class="edit-comment">
+        
     </div>
 </div>
